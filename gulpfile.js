@@ -38,7 +38,7 @@ var htmlFiles = [
 			dev + '/**/*.js'
 	],
 	musicFiles = [
-		dev + '/music/*.mp3'
+			dev + '/music/*.mp3'
 	];
 
 var vendorCss = [
@@ -50,6 +50,7 @@ var vendorCss = [
 			bower + '/ui-router/release/angular-ui-router.min.js',
 			bower + '/angular-animate/angular-animate.min.js',
 			bower + '/angular-bootstrap/ui-bootstrap-tpls.min.js',
+			bower + '/d3/d3.min.js',
 			dev + '/vendor/**/*.js'
 	],
 	vendorFonts = [

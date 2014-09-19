@@ -23,3 +23,13 @@ body {
 	left: 10px;
 	opacity: 0;
 }
+
+.chart rect {
+	fill: steelblue;
+}
+
+.chart text {
+	fill: white;
+	font: 10px sans-serif;
+	text-anchor: middle;
+}
