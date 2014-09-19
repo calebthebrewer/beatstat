@@ -1,3 +1,12 @@
 <div class="jumbotron">
-	<svg class="chart"></svg>
+	<div class="container">
+		<h1>Beat Stat</h1>
+	</div>
 </div>
+<svg class="chart" ng-attr-height="{{chart.height}}" ng-attr-width="{{chart.width}}">
+	<rect ng-repeat="datum in data track by $index"
+		  ng-attr-x="{{$index * chart.barWidth}}"
+		  ng-attr-y="{{chart.height - scale(datum)}}"
+		  ng-attr-height="{{scale(datum)}}"
+		  ng-attr-width="{{chart.barWidth}}"></rect>
+</svg>

@@ -2,10 +2,6 @@ body {
 	overflow-x: hidden;
 }
 
-.main-view {
-	padding-top: 50px;
-}
-
 .slide {
 	position: relative;
 }
@@ -24,12 +20,9 @@ body {
 	opacity: 0;
 }
 
-.chart rect {
-	fill: steelblue;
-}
-
-.chart text {
-	fill: white;
-	font: 10px sans-serif;
-	text-anchor: middle;
+.chart {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	fill: #428bca;
 }

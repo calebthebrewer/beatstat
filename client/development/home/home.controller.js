@@ -4,18 +4,17 @@ angular.module('app')
 		'$http',
 		'$interval',
 		function($scope, $http, $interval) {
-			var //streamUrl = 'https://api.soundcloud.com/tracks/32842984/stream?client_id=7eadfcb24859c38770417ef858756544',
-				streamUrl = 'music/beautiful-girls.mp3',
-				audioCtx = new (window.AudioContext || window.webkitAudioContext)(),
+			//audio stuff
+			var audioCtx = new (window.AudioContext || window.webkitAudioContext)(),
 				soundSource = audioCtx.createBufferSource(),
 				analyser = audioCtx.createAnalyser(),
 				stream,
 				soundSource;
 
 			analyser.minDecibels = -90;
-			analyser.maxDecibels = -10;
-			analyser.smoothingTimeConstant = 0.85;
-			analyser.fftSize = 32;
+			analyser.maxDecibels = -15;
+			analyser.smoothingTimeConstant = .65;
+			analyser.fftSize = 128;
 			var bufferLength = analyser.fftSize;
 			window.dataArray = new Uint8Array(bufferLength);
 
@@ -23,64 +22,46 @@ angular.module('app')
 			soundSource.connect(analyser);
 			window.analyser = analyser;
 
-			$http({
-				url: streamUrl,
-				method: 'GET',
-				responseType: 'arraybuffer'
-			})
-				.success(function(audioData) {
-					audioCtx.decodeAudioData(audioData, function(buffer) {
-						soundSource.buffer = buffer;
-						soundSource.start(0);
-						$interval(beatStat,50);
-					}, function(e) {
-						console.log("Error with decoding audio data" + e.err);
-					});
+			//scope stuff
+			$scope.id = '167265594';
+			$scope.chart = {
+				height: window.innerHeight - 100,
+				width: window.innerWidth,
+				barWidth: window.innerWidth / analyser.fftSize
+			};
+			$scope.scale = function(number) {
+				return $scope.chart.height * number / 200;
+			} ;
+			$scope.load = function() {
+				var streamUrl = 'https://api.soundcloud.com/tracks/' + $scope.id + '/stream?client_id=7eadfcb24859c38770417ef858756544';
+				//var streamUrl = 'music/beautiful-girls.mp3';
+
+				$http({
+					url: streamUrl,
+					method: 'GET',
+					responseType: 'arraybuffer'
 				})
-				.error(function(error) {
-					console.log(error);
-				});
-
-			var chart = function() {
-				var chart = {},
-					svg= d3.select('.chart');
-				svg.attr('height', 400);
-				svg.attr('width', 800);
-				var width = 800,
-					height = 400;
-
-				var dataWidth = 32,
-					dataHeight = 128;
-
-				var barWidth = width / dataWidth;
-
-				var x = d3.scale.linear()
-					.domain([0, dataWidth])
-					.range([0, width]);
-
-				var y = d3.scale.linear()
-					.domain([0, dataHeight])
-					.range([0, height]);
-
-				chart.draw = function(data) {
-					var bars = svg.selectAll('rect')
-						.remove()
-						.data(data)
-						.enter().append('rect')
-						.attr('x', function(d, i) {return i * barWidth;})
-						.attr('y', 0)
-						.attr('width', barWidth)
-						.attr('height', function(d) {return d;});
-				}
-
-				return chart;
-			}();
+					.success(function(audioData) {
+						audioCtx.decodeAudioData(audioData, function(buffer) {
+							soundSource.buffer = buffer;
+							soundSource.start(0);
+							$interval(beatStat, 50);
+						}, function(e) {
+							console.log("Error with decoding audio data" + e.err);
+						});
+					})
+					.error(function(error) {
+						console.log(error);
+					});
+			};
 
 			function beatStat() {
 				analyser.getByteTimeDomainData(dataArray);
-				chart.draw(dataArray);
 				$scope.data = dataArray;
 			}
+
+			//kick it off
+			$scope.load();
 
 		}]);
 
