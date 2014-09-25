@@ -1,0 +1,10 @@
+<svg ng-if="options"
+	 ng-attr-height="{{options.height}}"
+	 ng-attr-width="{{options.width}}">
+	<rect ng-repeat="datum in data track by $index"
+		  ng-attr-fill="{{options.fill}}"
+		  ng-attr-x="{{$index * options.barWidth}}"
+		  ng-attr-y="{{options.height - scale(datum)}}"
+		  ng-attr-height="{{scale(datum)}}"
+		  ng-attr-width="{{options.barWidth}}"></rect>
+</svg>

@@ -4,37 +4,55 @@ angular.module('app')
 		'$http',
 		'$interval',
 		function($scope, $http, $interval) {
+
 			//audio stuff
 			var audioCtx = new (window.AudioContext || window.webkitAudioContext)(),
 				soundSource = audioCtx.createBufferSource(),
-				analyser = audioCtx.createAnalyser(),
-				stream,
-				soundSource;
-
-			analyser.minDecibels = -90;
-			analyser.maxDecibels = -15;
-			analyser.smoothingTimeConstant = .65;
-			analyser.fftSize = 128;
-			var bufferLength = analyser.fftSize;
-			window.dataArray = new Uint8Array(bufferLength);
+				analyserL = audioCtx.createAnalyser(),
+				analyserR = audioCtx.createAnalyser(),
+				splitter = audioCtx.createChannelSplitter();
 
 			soundSource.connect(audioCtx.destination);
-			soundSource.connect(analyser);
-			window.analyser = analyser;
+			soundSource.connect(splitter);
+			splitter.connect(analyserL, 0);
+			splitter.connect(analyserR, 1);
 
-			//scope stuff
-			$scope.id = '167265594';
-			$scope.chart = {
-				height: window.innerHeight - 100,
-				width: window.innerWidth,
-				barWidth: window.innerWidth / analyser.fftSize
+			var analyserConfig = {
+				minDecibels: -100,
+				maxDecibals: 0,
+				smoothingTimeConstant: .75,
+				fftSize: 256
 			};
-			$scope.scale = function(number) {
-				return $scope.chart.height * number / 200;
-			} ;
-			$scope.load = function() {
-				var streamUrl = 'https://api.soundcloud.com/tracks/' + $scope.id + '/stream?client_id=7eadfcb24859c38770417ef858756544';
+
+			angular.extend(analyserL, analyserConfig);
+			angular.extend(analyserR, analyserConfig);
+
+			$scope.timeDomainData = new Uint8Array(analyserL.fftSize);
+
+			$scope.frequencyDataL = new Uint8Array(analyserR.frequencyBinCount);
+			$scope.frequencyDataR = new Uint8Array(analyserR.frequencyBinCount);
+
+			setConfigs();
+			start();
+
+			function setConfigs() {
+				$scope.timeDomainConfig = {
+					width: window.innerWidth,
+					height: window.innerHeight - 100,
+					maxValue: 256
+				};
+				$scope.frequencyConfig = {
+					width: window.innerWidth / 2,
+					height: window.innerHeight - 100,
+					maxValue: 256,
+					fill: 'red'
+				};
+			}
+
+			function start() {
+				var streamUrl = 'https://api.soundcloud.com/tracks/167265594/stream?client_id=7eadfcb24859c38770417ef858756544';
 				//var streamUrl = 'music/beautiful-girls.mp3';
+				//var streamUrl = 'music/stolen-dance.mp3';
 
 				$http({
 					url: streamUrl,
@@ -42,7 +60,10 @@ angular.module('app')
 					responseType: 'arraybuffer'
 				})
 					.success(function(audioData) {
+						$scope.loaded = true;
+						$scope.decoding = true;
 						audioCtx.decodeAudioData(audioData, function(buffer) {
+							$scope.decoding = false;
 							soundSource.buffer = buffer;
 							soundSource.start(0);
 							$interval(beatStat, 50);
@@ -56,12 +77,11 @@ angular.module('app')
 			};
 
 			function beatStat() {
-				analyser.getByteTimeDomainData(dataArray);
-				$scope.data = dataArray;
+				analyserL.getByteFrequencyData($scope.frequencyDataL);
+				analyserL.getByteFrequencyData($scope.frequencyDataR);
+				analyserL.getByteTimeDomainData($scope.timeDomainData);
+				setConfigs();
 			}
-
-			//kick it off
-			$scope.load();
 
 		}]);
 

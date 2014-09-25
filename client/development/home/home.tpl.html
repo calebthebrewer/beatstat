@@ -3,10 +3,10 @@
 		<h1>Beat Stat</h1>
 	</div>
 </div>
-<svg class="chart" ng-attr-height="{{chart.height}}" ng-attr-width="{{chart.width}}">
-	<rect ng-repeat="datum in data track by $index"
-		  ng-attr-x="{{$index * chart.barWidth}}"
-		  ng-attr-y="{{chart.height - scale(datum)}}"
-		  ng-attr-height="{{scale(datum)}}"
-		  ng-attr-width="{{chart.barWidth}}"></rect>
-</svg>
+<div class="container">
+	<div ng-if="decoding" class="alert alert-success text-center" role="alert">decodin'...</div>
+	<div ng-if="!loaded" class="alert alert-info text-center" role="alert">loadin'...</div>
+</div>
+<chart class="chart" data="frequencyDataL" config="frequencyConfig"></chart>
+<chart class="chart pull-right" data="frequencyDataR" config="frequencyConfig"></chart>
+<chart class="chart opaque" data="timeDomainData" config="timeDomainConfig"></chart>

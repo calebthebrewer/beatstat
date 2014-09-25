@@ -1,1 +1,1 @@
-angular.module('app', ['ui.router', 'ngAnimate', 'templates']);
+angular.module('app', ['ui.router', 'templates']);
